@@ -1,16 +1,22 @@
+```html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
+>
 
 <title>Fishing Log Pro</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
 />
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -27,9 +33,18 @@
 }
 
 body{
-    background:linear-gradient(180deg,#0f172a,#1e3a8a);
+
+    background:
+    linear-gradient(
+        180deg,
+        #0f172a,
+        #1e3a8a
+    );
+
     color:white;
+
     min-height:100vh;
+
     padding:20px;
 }
 
@@ -49,22 +64,42 @@ body{
 }
 
 .main-card{
-    background:rgba(255,255,255,0.08);
+
+    background:
+    rgba(255,255,255,0.08);
+
     backdrop-filter:blur(10px);
+
     border-radius:24px;
+
     padding:25px;
+
     margin-bottom:25px;
 }
 
 .catch-button{
+
     width:100%;
+
     height:140px;
+
     border:none;
+
     border-radius:24px;
-    background:linear-gradient(135deg,#38bdf8,#2563eb);
+
+    background:
+    linear-gradient(
+        135deg,
+        #38bdf8,
+        #2563eb
+    );
+
     color:white;
+
     font-size:2.5rem;
+
     font-weight:bold;
+
     cursor:pointer;
 }
 
@@ -80,24 +115,40 @@ body{
 .input-group input,
 .input-group textarea,
 #fishFilter{
+
     width:100%;
+
     padding:14px;
+
     border:none;
+
     border-radius:14px;
-    background:rgba(255,255,255,0.12);
+
+    background:
+    rgba(255,255,255,0.12);
+
     color:white;
 }
 
 .save-button,
 .export-button{
+
     width:100%;
+
     padding:15px;
+
     border:none;
+
     border-radius:14px;
+
     color:white;
+
     font-size:1rem;
+
     font-weight:bold;
+
     cursor:pointer;
+
     margin-top:10px;
 }
 
@@ -110,31 +161,50 @@ body{
 }
 
 #map{
+
     height:400px;
+
     border-radius:20px;
+
     margin-bottom:25px;
 }
 
 .history-item{
-    background:rgba(255,255,255,0.08);
+
+    background:
+    rgba(255,255,255,0.08);
+
     border-radius:18px;
+
     padding:18px;
+
     margin-bottom:15px;
 }
 
 .delete-button{
+
     background:#ef4444;
+
     border:none;
+
     color:white;
+
     padding:8px 14px;
+
     border-radius:10px;
+
     cursor:pointer;
 }
 
 canvas{
+
     margin-top:15px;
-    background:rgba(255,255,255,0.05);
+
+    background:
+    rgba(255,255,255,0.05);
+
     border-radius:14px;
+
     padding:10px;
 }
 
@@ -150,45 +220,85 @@ a{
 <div class="container">
 
 <div class="title">
-<h1>🎣 Fishing Log Pro</h1>
-<p>GPS・リアル潮汐・水温対応</p>
+
+<h1>
+🎣 Fishing Log Pro
+</h1>
+
+<p>
+GPS・リアル潮汐・水温対応
+</p>
+
 </div>
 
 <div class="main-card">
 
-<button class="catch-button" id="catchButton">
+<button
+class="catch-button"
+id="catchButton"
+>
 釣れた！
 </button>
 
 <div id="loading"></div>
 
-<div class="form-area" id="formArea">
+<div
+class="form-area"
+id="formArea"
+>
 
 <div class="input-group">
-<input type="text" id="fishType" placeholder="魚種">
+
+<input
+type="text"
+id="fishType"
+placeholder="魚種"
+>
+
 </div>
 
 <div class="input-group">
-<input type="number" id="fishSize" placeholder="サイズ(cm)">
+
+<input
+type="number"
+id="fishSize"
+placeholder="サイズ(cm)"
+>
+
 </div>
 
 <div class="input-group">
-<textarea id="memo" placeholder="メモ"></textarea>
+
+<textarea
+id="memo"
+placeholder="メモ"
+></textarea>
+
 </div>
 
-<button class="save-button" id="saveButton">
+<button
+class="save-button"
+id="saveButton"
+>
 保存する
 </button>
 
 </div>
 </div>
 
-<button class="export-button" onclick="exportCSV()">
+<button
+class="export-button"
+onclick="exportCSV()"
+>
 CSV出力
 </button>
 
 <select id="fishFilter">
-<option value="all">すべての魚種</option>
+
+<option value="all">
+すべての魚種
+</option>
+
 </select>
 
 <div id="map"></div>
@@ -199,47 +309,87 @@ CSV出力
 
 <script>
 
-const STORMGLASS_API_KEY = "ebd1e582-5b77-11f1-bdb4-0242ac120004-ebd1e640-5b77-11f1-bdb4-0242ac120004";
+const STORMGLASS_API_KEY =
+"ebd1e582-5b77-11f1-bdb4-0242ac120004-ebd1e640-5b77-11f1-bdb4-0242ac120004";
 
 let currentCatchData = null;
+
 let map;
+
 let heatLayer;
 
-const catchButton = document.getElementById("catchButton");
-const formArea = document.getElementById("formArea");
-const saveButton = document.getElementById("saveButton");
-const historyList = document.getElementById("historyList");
-const loading = document.getElementById("loading");
+const catchButton =
+document.getElementById(
+    "catchButton"
+);
 
-catchButton.addEventListener("click", async () => {
+const formArea =
+document.getElementById(
+    "formArea"
+);
 
-    loading.innerText = "GPS・潮汐取得中...";
+const saveButton =
+document.getElementById(
+    "saveButton"
+);
+
+const historyList =
+document.getElementById(
+    "historyList"
+);
+
+const loading =
+document.getElementById(
+    "loading"
+);
+
+catchButton.addEventListener(
+"click",
+
+async () => {
+
+    loading.innerText =
+    "GPS・潮汐取得中...";
 
     try{
 
-        const position = await getCurrentPosition();
+        const position =
+        await getCurrentPosition();
 
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
+        const lat =
+        position.coords.latitude;
 
-        const tideData = await getRealTide(lat, lon);
+        const lon =
+        position.coords.longitude;
+
+        const tideData =
+        await getRealTide(lat, lon);
 
         currentCatchData = {
+
             latitude:lat,
+
             longitude:lon,
-            datetime:new Date().toISOString(),
+
+            datetime:
+            new Date().toISOString(),
+
             tide:tideData
+
         };
 
         loading.innerText = "";
 
-        formArea.style.display = "block";
+        formArea.style.display =
+        "block";
 
     }catch(err){
 
         loading.innerText = "";
 
-        alert("データ取得失敗");
+        alert(
+            "データ取得失敗"
+        );
 
         console.error(err);
 
@@ -247,186 +397,376 @@ catchButton.addEventListener("click", async () => {
 
 });
 
-saveButton.addEventListener("click", () => {
+saveButton.addEventListener(
+"click",
+
+() => {
 
     if(!currentCatchData) return;
 
-    const fishType = document.getElementById("fishType").value;
-    const fishSize = document.getElementById("fishSize").value;
-    const memo = document.getElementById("memo").value;
+    const fishType =
+    document.getElementById(
+        "fishType"
+    ).value;
+
+    const fishSize =
+    document.getElementById(
+        "fishSize"
+    ).value;
+
+    const memo =
+    document.getElementById(
+        "memo"
+    ).value;
 
     const record = {
+
         ...currentCatchData,
+
         fishType,
+
         fishSize,
+
         memo
+
     };
 
-    const logs = JSON.parse(localStorage.getItem("fishingLogs") || "[]");
+    const logs =
+    JSON.parse(
+
+        localStorage.getItem(
+            "fishingLogs"
+        ) || "[]"
+
+    );
 
     logs.unshift(record);
 
-    localStorage.setItem("fishingLogs", JSON.stringify(logs));
+    localStorage.setItem(
+
+        "fishingLogs",
+
+        JSON.stringify(logs)
+
+    );
 
     renderLogs();
 
-    formArea.style.display = "none";
+    formArea.style.display =
+    "none";
 
 });
 
 function getCurrentPosition(){
 
-    return new Promise((resolve,reject) => {
+    return new Promise(
+    (resolve,reject) => {
 
-        navigator.geolocation.getCurrentPosition(
+        navigator.geolocation
+        .getCurrentPosition(
+
             resolve,
+
             reject,
+
             {
                 enableHighAccuracy:true,
                 timeout:10000
             }
+
         );
 
     });
 
 }
 
-async function getRealTide(lat, lon){
-
-    const weatherUrl =
-        `https://api.stormglass.io/v2/weather/point` +
-        `?lat=${lat}` +
-        `&lng=${lon}` +
-        `&params=waterTemperature`;
-
-    const weatherResponse =
-        await fetch(weatherUrl, {
-            headers:{
-                Authorization:STORMGLASS_API_KEY
-            }
-        });
-
-    const weatherData = await weatherResponse.json();
+async function getRealTide(
+lat,
+lon
+){
 
     let waterTemp = "不明";
 
-    if(weatherData.hours && weatherData.hours.length > 0){
+    let highTide =
+    "取得失敗";
 
-        waterTemp =
+    let lowTide =
+    "取得失敗";
+
+    try{
+
+        // ===== 水温 =====
+
+        const weatherUrl =
+
+        `https://api.stormglass.io/v2/weather/point` +
+
+        `?lat=${lat}` +
+
+        `&lng=${lon}` +
+
+        `&params=waterTemperature`;
+
+        const weatherResponse =
+
+        await fetch(
+            weatherUrl,
+            {
+                headers:{
+                    Authorization:
+                    STORMGLASS_API_KEY
+                }
+            }
+        );
+
+        const weatherData =
+
+        await weatherResponse.json();
+
+        if(
+
+            weatherData.hours &&
+
+            weatherData.hours.length > 0
+
+        ){
+
+            waterTemp =
+
             weatherData.hours[0]
-            .waterTemperature?.sg ?? "不明";
+            .waterTemperature?.sg
+
+            ?? "不明";
+
+        }
+
+    }catch(err){
+
+        console.error(
+            "水温取得失敗",
+            err
+        );
+
+    }
+id="ibxq9g"
+    try{
+
+        // ===== 満潮干潮 =====
+
+        const tideUrl =
+
+        `https://api.stormglass.io/v2/tide/extremes/point` +
+
+        `?lat=${lat}` +
+
+        `&lng=${lon}`;
+
+        const tideResponse =
+
+        await fetch(
+            tideUrl,
+            {
+                headers:{
+                    Authorization:
+                    STORMGLASS_API_KEY
+                }
+            }
+        );
+
+        const tideData =
+        await tideResponse.json();
+
+        const extremes =
+        tideData.data || [];
+
+        let highList = [];
+        let lowList = [];
+
+        extremes.forEach(item => {
+
+            const time =
+
+            new Date(item.time)
+            .toLocaleTimeString(
+                "ja-JP",
+                {
+                    hour:"2-digit",
+                    minute:"2-digit"
+                }
+            );
+
+            if(item.type === "high"){
+
+                highList.push(time);
+
+            }else if(item.type === "low"){
+
+                lowList.push(time);
+
+            }
+
+        });
+
+        highTide =
+        highList.join(" / ");
+
+        lowTide =
+        lowList.join(" / ");
+
+    }catch(err){
+
+        console.error(
+            "潮汐取得失敗",
+            err
+        );
 
     }
 
-    const tideUrl =
-        `https://api.stormglass.io/v2/tide/extremes/point` +
-        `?lat=${lat}` +
-        `&lng=${lon}`;
-
-    const tideResponse =
-        await fetch(tideUrl, {
-            headers:{
-                Authorization:STORMGLASS_API_KEY
-            }
-        });
-
-    const tideData = await tideResponse.json();
-
-    id="1fpl92"
-    const extremes = tideData.data || [];
-
-    let highTide = [];
-    let lowTide = [];
-
-    extremes.forEach(item => {
-
-        const time =
-            new Date(item.time)
-            .toLocaleTimeString("ja-JP", {
-                hour:"2-digit",
-                minute:"2-digit"
-            });
-
-        if(item.type === "high"){
-            highTide.push(time);
-        }else if(item.type === "low"){
-            lowTide.push(time);
-        }
-
-    });
-
     return {
+
         tideName:"実潮汐",
+
         tideState:"取得済み",
-        highTide:highTide.join(" / "),
-        lowTide:lowTide.join(" / "),
+
+        highTide,
+
+        lowTide,
+
         waterTemp
+
     };
+
+}
+
+function generateFakeTide(){
+
+    let data = [];
+
+    for(let i=0;i<=24;i++){
+
+        const v =
+
+        50 +
+
+        Math.sin(
+            (i / 24) *
+            Math.PI * 2
+        ) * 40;
+
+        data.push(v);
+
+    }
+
+    return data;
 
 }
 
 function renderLogs(){
 
-    const allLogs = JSON.parse(localStorage.getItem("fishingLogs") || "[]");
+    const allLogs = JSON.parse(
+        localStorage.getItem(
+            "fishingLogs"
+        ) || "[]"
+    );
 
     const fishFilter =
-        document.getElementById("fishFilter")?.value || "all";
+
+    document.getElementById(
+        "fishFilter"
+    )?.value || "all";
 
     const logs =
-        fishFilter === "all"
-        ? allLogs
-        : allLogs.filter(log => log.fishType === fishFilter);
+
+    fishFilter === "all"
+
+    ? allLogs
+
+    : allLogs.filter(
+        log =>
+        log.fishType === fishFilter
+    );
 
     historyList.innerHTML = "";
 
     logs.forEach((log,index) => {
 
-        const div = document.createElement("div");
+        const div =
+        document.createElement(
+            "div"
+        );
 
-        div.className = "history-item";
+        div.className =
+        "history-item";
 
         div.innerHTML = `
 
-        <h3>${log.fishType} ${log.fishSize}cm</h3>
+        <h3>
+        ${log.fishType}
+        ${log.fishSize}cm
+        </h3>
 
         <p>
-        📅 ${new Date(log.datetime).toLocaleString("ja-JP")}
+        📅
+        ${new Date(
+            log.datetime
+        ).toLocaleString("ja-JP")}
         </p>
 
         <p>
-        🌡 水温：${log.tide.waterTemp} ℃
+        🌡 水温：
+        ${log.tide.waterTemp} ℃
         </p>
 
         <p>
-        ⬆ 満潮：${log.tide.highTide}
+        ⬆ 満潮：
+        ${log.tide.highTide}
         </p>
 
         <p>
-        ⬇ 干潮：${log.tide.lowTide}
+        ⬇ 干潮：
+        ${log.tide.lowTide}
         </p>
 
         <p>
         📍
-        <a href="https://www.google.com/maps?q=${log.latitude},${log.longitude}" target="_blank">
+
+        <a
+        href="https://www.google.com/maps?q=${log.latitude},${log.longitude}"
+        target="_blank"
+        >
+
         GoogleMap
+
         </a>
+
         </p>
 
         <p>
         📝 ${log.memo}
         </p>
 
-        <canvas id="chart-${index}" height="120"></canvas>
+        <canvas
+        id="chart-${index}"
+        height="120"
+        ></canvas>
 
-        <button class="delete-button" onclick="deleteLog(${index})">
+        <button
+        class="delete-button"
+        onclick="deleteLog(${index})"
+        >
+
         削除
+
         </button>
 
         `;
 
         historyList.appendChild(div);
 
-        drawTideChart(index, log);
+        drawTideChart(
+            index,
+            log
+        );
 
     });
 
@@ -436,23 +776,43 @@ function renderLogs(){
 
 }
 
-function drawTideChart(index, log){
+function drawTideChart(
+index,
+log
+){
 
-    const ctx = document.getElementById(`chart-${index}`);
+    const ctx =
+
+    document.getElementById(
+        `chart-${index}`
+    );
 
     if(!ctx) return;
 
-    const labels = ["0","3","6","9","12","15","18","21","24"];
+    const labels = [];
 
-    const tideData = [20,50,95,60,25,40,90,65,20];
+    for(let i=0;i<=24;i++){
 
-    const catchHour = new Date(log.datetime).getHours();
+        labels.push(
+            `${i}:00`
+        );
 
-    const markerData = labels.map(label => {
+    }
 
-        const h = parseInt(label);
+    const tideData =
+    generateFakeTide();
 
-        if(Math.abs(h - catchHour) <= 1){
+    const catchHour =
+
+    new Date(
+        log.datetime
+    ).getHours();
+
+    const markerData =
+
+    labels.map((_,i) => {
+
+        if(i === catchHour){
             return 100;
         }
 
@@ -465,20 +825,31 @@ function drawTideChart(index, log){
         type:"line",
 
         data:{
+
             labels,
+
             datasets:[
+
                 {
                     label:"潮位",
+
                     data:tideData,
+
                     tension:0.4
                 },
+
                 {
                     label:"釣れた時間",
+
                     data:markerData,
+
                     pointRadius:8,
+
                     showLine:false
                 }
+
             ]
+
         }
 
     });
@@ -489,32 +860,50 @@ function renderMap(logs){
 
     if(!map){
 
-        map = L.map("map").setView([34.0,132.0],8);
+        map =
+
+        L.map("map")
+        .setView(
+            [34.0,132.0],
+            8
+        );
 
         L.tileLayer(
+
             "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+
             {
-                attribution:"© OpenStreetMap"
+                attribution:
+                "© OpenStreetMap"
             }
+
         ).addTo(map);
 
     }
 
-    const heatData = logs.map(log => [
+    const heatData =
+
+    logs.map(log => [
+
         log.latitude,
+
         log.longitude,
+
         1
+
     ]);
 
     if(heatLayer){
         heatLayer.remove();
     }
 
-    heatLayer = L.heatLayer(
+    heatLayer =
+
+    L.heatLayer(
         heatData,
         {
             radius:10,
-            blur:8,
+            blur:7,
             maxZoom:10
         }
     ).addTo(map);
@@ -523,45 +912,78 @@ function renderMap(logs){
 
 function updateFishFilter(logs){
 
-    const fishFilter = document.getElementById("fishFilter");
+    const fishFilter =
 
-    const currentValue = fishFilter.value;
+    document.getElementById(
+        "fishFilter"
+    );
+
+    const currentValue =
+    fishFilter.value;
 
     const fishTypes = [
+
         ...new Set(
+
             logs
-            .map(log => log.fishType)
+
+            .map(
+                log =>
+                log.fishType
+            )
+
             .filter(type => type)
+
         )
+
     ];
 
     fishFilter.innerHTML = `
+
         <option value="all">
+
         すべての魚種
+
         </option>
+
     `;
 
     fishTypes.forEach(type => {
 
         fishFilter.innerHTML += `
+
             <option value="${type}">
             ${type}
             </option>
+
         `;
 
     });
 
-    fishFilter.value = currentValue || "all";
+    fishFilter.value =
+    currentValue || "all";
 
 }
 
 function deleteLog(index){
 
-    const logs = JSON.parse(localStorage.getItem("fishingLogs") || "[]");
+    const logs = JSON.parse(
+
+        localStorage.getItem(
+            "fishingLogs"
+        ) || "[]"
+
+    );
 
     logs.splice(index,1);
 
-    localStorage.setItem("fishingLogs", JSON.stringify(logs));
+    localStorage.setItem(
+
+        "fishingLogs",
+
+        JSON.stringify(logs)
+
+    );
 
     renderLogs();
 
@@ -569,39 +991,69 @@ function deleteLog(index){
 
 function exportCSV(){
 
-    const logs = JSON.parse(localStorage.getItem("fishingLogs") || "[]");
+    const logs = JSON.parse(
+
+        localStorage.getItem(
+            "fishingLogs"
+        ) || "[]"
+
+    );
 
     let csv =
-        "日時,魚種,サイズ,水温,緯度,経度,メモ\n";
+
+    "日時,魚種,サイズ,水温,緯度,経度,メモ\n";
 
     logs.forEach(log => {
 
         csv +=
-            `"${new Date(log.datetime).toLocaleString("ja-JP")}",` +
-            `"${log.fishType}",` +
-            `"${log.fishSize}",` +
-            `"${log.tide.waterTemp}",` +
-            `"${log.latitude}",` +
-            `"${log.longitude}",` +
-            `"${log.memo}"\n`;
+
+        `"${new Date(
+            log.datetime
+        ).toLocaleString("ja-JP")}",` +
+
+        `"${log.fishType}",` +
+
+        `"${log.fishSize}",` +
+
+        `"${log.tide.waterTemp}",` +
+
+        `"${log.latitude}",` +
+
+        `"${log.longitude}",` +
+
+        `"${log.memo}"\n`;
 
     });
 
-    const blob = new Blob([csv], {type:"text/csv"});
+    const blob =
 
-    const link = document.createElement("a");
+    new Blob(
+        [csv],
+        {type:"text/csv"}
+    );
 
-    link.href = URL.createObjectURL(blob);
+    const link =
+    document.createElement("a");
 
-    link.download = "fishing_log.csv";
+    link.href =
+    URL.createObjectURL(blob);
+
+    link.download =
+    "fishing_log.csv";
 
     link.click();
 
 }
 
-document.addEventListener("change", (e) => {
+document.addEventListener(
+"change",
 
-    if(e.target.id === "fishFilter"){
+(e) => {
+
+    if(
+        e.target.id ===
+        "fishFilter"
+    ){
         renderLogs();
     }
 
@@ -613,4 +1065,5 @@ renderLogs();
 
 </body>
 </html>
+```
 
