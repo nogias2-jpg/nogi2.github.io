@@ -446,7 +446,7 @@ async function getRealTide(lat, lon){
         ).toISOString();
 
     const url =
-        `https://api.stormglass.io/v2/weather/point` +
+        `https://api.stormglass.io/v2/tide/extremes/point` +
         `?lat=${lat}` +
         `&lng=${lon}` +
         `&params=waterTemperature` +
@@ -460,6 +460,31 @@ async function getRealTide(lat, lon){
     });
 
     const data = await response.json();
+    const tideExtremes = data.data || [];
+
+let highTide = [];
+let lowTide = [];
+
+tideExtremes.forEach(item => {
+
+    const time =
+        new Date(item.time)
+        .toLocaleTimeString("ja-JP", {
+            hour:"2-digit",
+            minute:"2-digit"
+        });
+
+    if(item.type === "high"){
+
+        highTide.push(time);
+
+    }else{
+
+        lowTide.push(time);
+
+    }
+
+});
 
     let waterTemp = "不明";
 
@@ -472,15 +497,18 @@ async function getRealTide(lat, lon){
 
     return {
 
-        tideName:"実データ",
-        tideState:"取得済み",
+    tideName:"実データ",
+    tideState:"取得済み",
 
-        highTide:"API使用時に追加予定",
-        lowTide:"API使用時に追加予定",
+    highTide:
+        highTide.join(" / "),
 
-        waterTemp
+    lowTide:
+        lowTide.join(" / "),
 
-    };
+    waterTemp
+
+};
 
 }
 
@@ -565,6 +593,14 @@ function renderLogs(){
                 🌡 水温：
                 ${log.tide.waterTemp} ℃
                 <br>
+
+                ⬆ 満潮：
+                ${log.tide.highTide}
+
+                <br>
+
+                ⬇ 干潮：
+                ${log.tide.lowTide}
 
                 📝
                 ${log.memo || "メモなし"}
