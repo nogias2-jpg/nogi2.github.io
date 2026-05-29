@@ -1,0 +1,562 @@
+```html
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Fishing Log</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Segoe UI",sans-serif;
+}
+
+body{
+    background:linear-gradient(180deg,#0f172a,#1e3a8a);
+    color:white;
+    min-height:100vh;
+    padding:20px;
+}
+
+.container{
+    max-width:700px;
+    margin:auto;
+}
+
+.title{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.title h1{
+    font-size:2.4rem;
+    margin-bottom:8px;
+}
+
+.title p{
+    opacity:0.8;
+}
+
+.main-card{
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(10px);
+    border-radius:24px;
+    padding:25px;
+    margin-bottom:25px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.3);
+}
+
+.catch-button{
+    width:100%;
+    height:140px;
+    border:none;
+    border-radius:24px;
+    background:linear-gradient(135deg,#38bdf8,#2563eb);
+    color:white;
+    font-size:2.5rem;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.catch-button:active{
+    transform:scale(0.97);
+}
+
+.loading{
+    text-align:center;
+    margin-top:15px;
+    color:#93c5fd;
+}
+
+.form-area{
+    display:none;
+    margin-top:25px;
+}
+
+.input-group{
+    margin-bottom:18px;
+}
+
+.input-group label{
+    display:block;
+    margin-bottom:8px;
+}
+
+.input-group input,
+.input-group textarea{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:14px;
+    background:rgba(255,255,255,0.12);
+    color:white;
+    font-size:1rem;
+}
+
+.input-group textarea{
+    min-height:100px;
+    resize:vertical;
+}
+
+.save-button{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:14px;
+    background:#22c55e;
+    color:white;
+    font-size:1.1rem;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.history-title{
+    font-size:1.5rem;
+    margin-bottom:15px;
+}
+
+.history-list{
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+}
+
+.history-item{
+    background:rgba(255,255,255,0.08);
+    border-radius:18px;
+    padding:18px;
+    backdrop-filter:blur(10px);
+}
+
+.history-header{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:10px;
+    font-size:1.1rem;
+    font-weight:bold;
+}
+
+.history-detail{
+    line-height:1.8;
+    font-size:0.95rem;
+}
+
+.badge{
+    background:#0ea5e9;
+    display:inline-block;
+    padding:5px 10px;
+    border-radius:999px;
+    font-size:0.8rem;
+}
+
+.delete-button{
+    background:#ef4444;
+    border:none;
+    color:white;
+    padding:8px 14px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.status{
+    text-align:center;
+    margin-top:15px;
+}
+
+a{
+    color:#7dd3fc;
+    text-decoration:none;
+}
+
+canvas{
+    margin-top:15px;
+    background:rgba(255,255,255,0.05);
+    border-radius:14px;
+    padding:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="title">
+        <h1>🎣 Fishing Log</h1>
+        <p>釣れた瞬間を記録しよう</p>
+    </div>
+
+    <div class="main-card">
+
+        <button class="catch-button" id="catchButton">
+            釣れた！
+        </button>
+
+        <div class="loading" id="loading"></div>
+
+        <div class="form-area" id="formArea">
+
+            <div class="input-group">
+                <label>魚種</label>
+                <input type="text" id="fishType" placeholder="例：アジ">
+            </div>
+
+            <div class="input-group">
+                <label>サイズ(cm)</label>
+                <input type="number" id="fishSize" placeholder="例：28">
+            </div>
+
+            <div class="input-group">
+                <label>メモ</label>
+                <textarea id="memo" placeholder="ヒットルアーや状況"></textarea>
+            </div>
+
+            <button class="save-button" id="saveButton">
+                保存する
+            </button>
+
+            <div class="status" id="status"></div>
+
+        </div>
+
+    </div>
+
+    <div class="history-title">
+        📖 履歴リスト
+    </div>
+
+    <div class="history-list" id="historyList"></div>
+
+</div>
+
+<script>
+
+let currentCatchData = null;
+
+const catchButton = document.getElementById("catchButton");
+const formArea = document.getElementById("formArea");
+const saveButton = document.getElementById("saveButton");
+const historyList = document.getElementById("historyList");
+const loading = document.getElementById("loading");
+const status = document.getElementById("status");
+
+catchButton.addEventListener("click", async () => {
+
+    loading.innerText = "GPS取得中...";
+
+    try{
+
+        const position = await getCurrentPosition();
+
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+
+        const now = new Date();
+
+        const tideInfo = calculateTide(now);
+
+        currentCatchData = {
+            latitude:lat,
+            longitude:lon,
+            datetime:now.toISOString(),
+            tide:tideInfo
+        };
+
+        loading.innerText = "";
+        formArea.style.display = "block";
+
+    }catch(err){
+
+        loading.innerText = "";
+        alert("位置情報を取得できませんでした");
+
+        console.error(err);
+    }
+
+});
+
+saveButton.addEventListener("click", () => {
+
+    if(!currentCatchData) return;
+
+    const fishType = document.getElementById("fishType").value;
+    const fishSize = document.getElementById("fishSize").value;
+    const memo = document.getElementById("memo").value;
+
+    const record = {
+        ...currentCatchData,
+        fishType,
+        fishSize,
+        memo
+    };
+
+    const logs = JSON.parse(localStorage.getItem("fishingLogs") || "[]");
+
+    logs.unshift(record);
+
+    localStorage.setItem("fishingLogs", JSON.stringify(logs));
+
+    renderLogs();
+
+    formArea.style.display = "none";
+
+    document.getElementById("fishType").value = "";
+    document.getElementById("fishSize").value = "";
+    document.getElementById("memo").value = "";
+
+    status.innerText = "保存しました！";
+
+    setTimeout(() => {
+        status.innerText = "";
+    },2000);
+
+});
+
+function getCurrentPosition(){
+
+    return new Promise((resolve,reject) => {
+
+        navigator.geolocation.getCurrentPosition(
+            resolve,
+            reject,
+            {
+                enableHighAccuracy:true,
+                timeout:10000
+            }
+        );
+
+    });
+
+}
+
+function calculateTide(date){
+
+    const hour = date.getHours();
+
+    let tideState = "";
+    let tideName = "";
+
+    if(hour < 6){
+        tideState = "上げ潮";
+        tideName = "中潮";
+    }else if(hour < 12){
+        tideState = "満潮付近";
+        tideName = "大潮";
+    }else if(hour < 18){
+        tideState = "下げ潮";
+        tideName = "中潮";
+    }else{
+        tideState = "干潮付近";
+        tideName = "小潮";
+    }
+
+    return{
+        tideName,
+        tideState,
+        highTide:"06:30 / 18:45",
+        lowTide:"00:15 / 12:20"
+    };
+
+}
+
+function renderLogs(){
+
+    const logs = JSON.parse(localStorage.getItem("fishingLogs") || "[]");
+
+    historyList.innerHTML = "";
+
+    if(logs.length === 0){
+
+        historyList.innerHTML = `
+            <div class="history-item">
+                まだ記録がありません
+            </div>
+        `;
+
+        return;
+    }
+
+    logs.forEach((log,index) => {
+
+        const div = document.createElement("div");
+
+        div.className = "history-item";
+
+        div.innerHTML = `
+
+            <div class="history-header">
+                <div>${log.fishType || "未入力"}</div>
+                <div>${log.fishSize || "-"} cm</div>
+            </div>
+
+            <div class="history-detail">
+
+                📅 ${new Date(log.datetime).toLocaleString("ja-JP")}<br>
+
+                📍
+                <a
+                    href="https://www.google.com/maps?q=${log.latitude},${log.longitude}"
+                    target="_blank"
+                >
+                    緯度 ${log.latitude.toFixed(5)}
+                    /
+                    経度 ${log.longitude.toFixed(5)}
+                </a>
+                <br>
+
+                🌊 潮回り：${log.tide.tideName}<br>
+                🌊 状態：${log.tide.tideState}<br>
+                ⬆ 満潮：${log.tide.highTide}<br>
+                ⬇ 干潮：${log.tide.lowTide}<br><br>
+
+                📝 ${log.memo || "メモなし"}
+
+            </div>
+
+            <canvas id="chart-${index}" height="120"></canvas>
+
+            <div style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                margin-top:15px;
+            ">
+
+                <div class="badge">
+                    記録済み
+                </div>
+
+                <button
+                    class="delete-button"
+                    onclick="deleteLog(${index})"
+                >
+                    削除
+                </button>
+
+            </div>
+
+        `;
+
+        historyList.appendChild(div);
+
+        drawTideChart(index, log);
+
+    });
+
+}
+
+function drawTideChart(index, log){
+
+    const ctx = document.getElementById(`chart-${index}`);
+
+    if(!ctx) return;
+
+    const labels = [
+        "0","3","6","9",
+        "12","15","18","21","24"
+    ];
+
+    const tideData = [
+        20,50,95,60,
+        25,40,90,65,20
+    ];
+
+    const catchHour = new Date(log.datetime).getHours();
+
+    const markerData = labels.map(label => {
+
+        const h = parseInt(label);
+
+        if(Math.abs(h - catchHour) <= 1){
+            return 100;
+        }
+
+        return null;
+
+    });
+
+    new Chart(ctx, {
+
+        type:"line",
+
+        data:{
+            labels:labels,
+            datasets:[
+                {
+                    label:"潮位",
+                    data:tideData,
+                    tension:0.4
+                },
+                {
+                    label:"釣れた時間",
+                    data:markerData,
+                    pointRadius:8,
+                    showLine:false
+                }
+            ]
+        },
+
+        options:{
+
+            responsive:true,
+
+            plugins:{
+                legend:{
+                    labels:{
+                        color:"white"
+                    }
+                }
+            },
+
+            scales:{
+                x:{
+                    ticks:{
+                        color:"white"
+                    }
+                },
+                y:{
+                    ticks:{
+                        color:"white"
+                    }
+                }
+            }
+
+        }
+
+    });
+
+}
+
+function deleteLog(index){
+
+    const ok = confirm("この記録を削除しますか？");
+
+    if(!ok) return;
+
+    const logs = JSON.parse(localStorage.getItem("fishingLogs") || "[]");
+
+    logs.splice(index,1);
+
+    localStorage.setItem("fishingLogs", JSON.stringify(logs));
+
+    renderLogs();
+
+}
+
+renderLogs();
+
+</script>
+
+</body>
+</html>
+```
