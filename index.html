@@ -587,6 +587,9 @@ id="ibxq9g"
         const extremes = (tideData.data || []).filter(item => {
             return new Date(item.time).toDateString() === today;
         });
+        extremes.sort((a, b) =>
+    new Date(a.time) - new Date(b.time)
+);
 
         let highList = [];
         let lowList = [];
