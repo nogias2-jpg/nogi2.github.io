@@ -582,8 +582,11 @@ id="ibxq9g"
         const tideData =
         await tideResponse.json();
 
-        const extremes =
-        tideData.data || [];
+        const today = new Date().toDateString();
+
+        const extremes = (tideData.data || []).filter(item => {
+            return new Date(item.time).toDateString() === today;
+        });
 
         let highList = [];
         let lowList = [];
