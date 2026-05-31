@@ -318,6 +318,8 @@ let currentCatchData = null;
 
 let map;
 
+let editingIndex = null;
+
 let heatLayer;
 
 const catchButton =
@@ -433,14 +435,27 @@ saveButton.addEventListener(
 
     };
 
-    const logs =
-    JSON.parse(
+const logs =
+JSON.parse(
+    localStorage.getItem("fishingLogs") || "[]"
+);
 
-        localStorage.getItem(
-            "fishingLogs"
-        ) || "[]"
+// 編集か新規か判定
+if(editingIndex !== null){
 
-    );
+    logs[editingIndex] = record;
+    editingIndex = null;
+
+}else{
+
+    logs.unshift(record);
+
+}
+
+localStorage.setItem(
+    "fishingLogs",
+    JSON.stringify(logs)
+);
 
     logs.unshift(record);
 
@@ -459,6 +474,22 @@ saveButton.addEventListener(
 
 });
 
+function editLog(index){
+
+    const logs =
+    JSON.parse(localStorage.getItem("fishingLogs") || "[]");
+
+    const log = logs[index];
+
+    document.getElementById("fishType").value = log.fishType;
+    document.getElementById("fishSize").value = log.fishSize;
+    document.getElementById("memo").value = log.memo;
+
+    editingIndex = index;
+
+    formArea.style.display = "block";
+}
+    
 function getCurrentPosition(){
 
     return new Promise(
