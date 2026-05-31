@@ -228,7 +228,7 @@ a{
 <div class="title">
 
 <h1>
-🎣 Fishing Log
+🎣 Fishing Log Pro
 </h1>
 
 <p>
@@ -362,8 +362,6 @@ async () => {
         const position =
         await getCurrentPosition();
 
-        //const locationName = await getLocationName(lat, lon);
-
         const lat =
         position.coords.latitude;
 
@@ -379,8 +377,9 @@ async () => {
 
             longitude:lon,
 
-            locationName:"未取得",
-            datetime:new Date().toISOString(),
+            datetime:
+            new Date().toISOString(),
+
             tide:tideData
 
         };
@@ -487,44 +486,11 @@ function getCurrentPosition(){
 
 }
 
-async function getLocationName(lat, lon){
+async function getRealTide(
+lat,
+lon
+){
 
-    try{
-
-        const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`
-        );
-
-        const data = await response.json();
-
-        const city =
-            data.address.city ||
-            data.address.town ||
-            data.address.village ||
-            "";
-
-        const suburb =
-            data.address.suburb ||
-            data.address.neighbourhood ||
-            "";
-
-        return `${city} ${suburb}`.trim();
-
-    }catch(err){
-
-        console.error(err);
-
-        return "位置不明";
-
-    }
-
-}
-
-
-    
-async function getRealTide(lat,lon)
-{
-    console.log("getRealTide開始");
     let waterTemp = "不明";
 
     let highTide =
@@ -588,7 +554,7 @@ async function getRealTide(lat,lon)
         );
 
     }
-
+id="ibxq9g"
     try{
 
         // ===== 満潮干潮 =====
@@ -667,8 +633,7 @@ async function getRealTide(lat,lon)
         );
 
     }
-    console.log("getRealTide終了");
-    
+
     return {
 
         tideName:"実潮汐",
@@ -775,9 +740,15 @@ function renderLogs(){
         </p>
 
         <p>
+        📍
 
-        <a href="https://www.google.com/maps?q=${log.latitude},${log.longitude}" target="_blank">
-        📍 ${log.locationName || "位置情報"}
+        <a
+        href="https://www.google.com/maps?q=${log.latitude},${log.longitude}"
+        target="_blank"
+        >
+
+        GoogleMap
+
         </a>
 
         </p>
@@ -1106,5 +1077,3 @@ renderLogs();
 
 </body>
 </html>
-
-
