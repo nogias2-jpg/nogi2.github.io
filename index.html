@@ -362,7 +362,7 @@ async () => {
         const position =
         await getCurrentPosition();
 
-        const locationName = await getLocationName(lat, lon);
+        //const locationName = await getLocationName(lat, lon);
 
         const lat =
         position.coords.latitude;
@@ -379,9 +379,8 @@ async () => {
 
             longitude:lon,
 
-            locationName,
-            datetime:
-            new Date().toISOString(),
+            locationName:"未取得",
+            datetime:new Date().toISOString(),
 
             tide:tideData
 
