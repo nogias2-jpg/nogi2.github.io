@@ -761,11 +761,15 @@ function renderLogs(){
 
         <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
 
-        <button onclick="editLog(${index})">
+        <button
+        onclick="editLog(${index})"
+        style="background:#28a745;color:white;border:none;padding:6px 12px;border-radius:6px;">
         編集
         </button>
 
-        <button onclick="deleteLog(${index})">
+        <button
+        onclick="deleteLog(${index})"
+        style="background:#dc3545;color:white;border:none;padding:6px 12px;border-radius:6px;">
         削除
         </button>
 
