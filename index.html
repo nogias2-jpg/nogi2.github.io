@@ -749,7 +749,7 @@ div.innerHTML = `
 <input id="edit-fish-${index}" value="${log.fishType}" style="width:120px;">
 <input id="edit-size-${index}" value="${log.fishSize}" style="width:60px;">cm
 </h3>
-
+<input type="file" id="edit-photo-${index}" accept="image/*">
 <p>📅 ${new Date(log.datetime).toLocaleString("ja-JP")}</p>
 
 <p>🌡 水温：${log.tide.waterTemp} ℃</p>
@@ -798,6 +798,8 @@ style="background:#6b7280;color:white;border:none;padding:6px 12px;border-radius
     <p>📍 <a href="https://www.google.com/maps?q=${log.latitude},${log.longitude}" target="_blank">GoogleMap</a></p>
 
     <p>📝 ${log.memo}</p>
+
+    ${log.photo ? `<img src="${log.photo}" style="width:100%; border-radius:10px; margin-top:10px;">` : ""}
 
     <canvas id="chart-${index}" height="120"></canvas>
 
@@ -930,6 +932,31 @@ function saveEdit(index){
 
     logs[index].memo =
         document.getElementById(`edit-memo-${index}`).value;
+
+    const fileInput =
+document.getElementById(`edit-photo-${index}`);
+
+if(fileInput && fileInput.files && fileInput.files[0]){
+
+    const reader = new FileReader();
+
+    reader.onload = function(e){
+
+        logs[index].photo = e.target.result;
+
+        localStorage.setItem(
+            "fishingLogs",
+            JSON.stringify(logs)
+        );
+
+        editingIndex = null;
+        renderLogs();
+    };
+
+    reader.readAsDataURL(fileInput.files[0]);
+
+    return;
+}
 
     localStorage.setItem(
         "fishingLogs",
