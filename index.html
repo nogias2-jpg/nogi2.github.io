@@ -470,7 +470,13 @@ localStorage.setItem(
     "none";
 
 });
+function startEdit(index){
 
+    editingIndex = index;
+
+    renderLogs();
+
+}
 function editLog(index){
 
     const logs =
@@ -735,75 +741,60 @@ function renderLogs(){
         div.className =
         "history-item";
 
-        div.innerHTML = `
+if(editingIndex === index){
 
-        <h3>
-        ${log.fishType}
-        ${log.fishSize}cm
-        </h3>
+    div.innerHTML = `
+    <h3>編集中</h3>
 
-        <p>
-        📅
-        ${new Date(
-            log.datetime
-        ).toLocaleString("ja-JP")}
-        </p>
+    <input id="edit-fish-${index}" value="${log.fishType}">
+    <input id="edit-size-${index}" value="${log.fishSize}">
+    <textarea id="edit-memo-${index}">${log.memo}</textarea>
 
-        <p>
-        🌡 水温：
-        ${log.tide.waterTemp} ℃
-        </p>
+    <button onclick="saveEdit(${index})"
+    style="background:#28a745;color:white;border:none;padding:6px 12px;border-radius:6px;">
+    保存
+    </button>
 
-        <p>
-        ⬆ 満潮：
-        ${log.tide.highTide}
-        </p>
+    <button onclick="cancelEdit()"
+    style="background:#6b7280;color:white;border:none;padding:6px 12px;border-radius:6px;">
+    キャンセル
+    </button>
+    `;
 
-        <p>
-        ⬇ 干潮：
-        ${log.tide.lowTide}
-        </p>
+}else{
 
-        <p>
-        📍
+    div.innerHTML = `
+    <h3>${log.fishType} ${log.fishSize}cm</h3>
 
-        <a
-        href="https://www.google.com/maps?q=${log.latitude},${log.longitude}"
-        target="_blank"
-        >
+    <p>📅 ${new Date(log.datetime).toLocaleString("ja-JP")}</p>
 
-        GoogleMap
+    <p>🌡 水温：${log.tide.waterTemp} ℃</p>
 
-        </a>
+    <p>⬆ 満潮：${log.tide.highTide}</p>
 
-        </p>
+    <p>⬇ 干潮：${log.tide.lowTide}</p>
 
-        <p>
-        📝 ${log.memo}
-        </p>
+    <p>📍 <a href="https://www.google.com/maps?q=${log.latitude},${log.longitude}" target="_blank">GoogleMap</a></p>
 
-        <canvas
-        id="chart-${index}"
-        height="120"
-        ></canvas>
+    <p>📝 ${log.memo}</p>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+    <canvas id="chart-${index}" height="120"></canvas>
 
-        <button
-        onclick="editLog(${index})"
+    <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+
+        <button onclick="startEdit(${index})"
         style="background:#28a745;color:white;border:none;padding:6px 12px;border-radius:6px;">
         編集
         </button>
 
-        <button
-        onclick="deleteLog(${index})"
+        <button onclick="deleteLog(${index})"
         style="background:#dc3545;color:white;border:none;padding:6px 12px;border-radius:6px;">
         削除
         </button>
 
-        </div>
-
-        `;
+    </div>
+    `;
+}
 
         historyList.appendChild(div);
 
@@ -900,6 +891,34 @@ log
 
 }
 
+function cancelEdit(){
+    editingIndex = null;
+    renderLogs();
+}
+
+function saveEdit(index){
+
+    const logs =
+    JSON.parse(localStorage.getItem("fishingLogs") || "[]");
+
+    logs[index].fishType =
+        document.getElementById(`edit-fish-${index}`).value;
+
+    logs[index].fishSize =
+        document.getElementById(`edit-size-${index}`).value;
+
+    logs[index].memo =
+        document.getElementById(`edit-memo-${index}`).value;
+
+    localStorage.setItem(
+        "fishingLogs",
+        JSON.stringify(logs)
+    );
+
+    editingIndex = null;
+    renderLogs();
+}
+    
 function renderMap(logs){
 
     if(!map){
