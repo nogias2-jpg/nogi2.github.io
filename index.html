@@ -381,7 +381,6 @@ async () => {
 
             locationName:"未取得",
             datetime:new Date().toISOString(),
-
             tide:tideData
 
         };
@@ -523,11 +522,8 @@ async function getLocationName(lat, lon){
 
 
     
-async function getRealTide(
-lat,
-lon
-){
-
+async function getRealTide(lat,lon)
+{
     let waterTemp = "不明";
 
     let highTide =
@@ -591,7 +587,7 @@ lon
         );
 
     }
-id="ibxq9g"
+
     try{
 
         // ===== 満潮干潮 =====
