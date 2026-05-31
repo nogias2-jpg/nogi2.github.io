@@ -355,6 +355,7 @@ async () => {
     loading.innerText =
     "GPS・潮汐取得中...";
 
+    catchButton.style.display = "none";
     try{
 
         const position =
@@ -467,6 +468,7 @@ localStorage.setItem(
 
     formArea.style.display =
     "none";
+    catchButton.style.display = "block";
 
 });
 function startEdit(index){
