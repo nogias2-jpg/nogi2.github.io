@@ -524,6 +524,7 @@ async function getLocationName(lat, lon){
     
 async function getRealTide(lat,lon)
 {
+    console.log("getRealTide開始");
     let waterTemp = "不明";
 
     let highTide =
@@ -666,7 +667,8 @@ async function getRealTide(lat,lon)
         );
 
     }
-
+    console.log("getRealTide終了");
+    
     return {
 
         tideName:"実潮汐",
