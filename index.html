@@ -511,7 +511,9 @@ async function getLocationName(lat, lon){
 
         return `${city} ${suburb}`.trim();
 
-    }catch{
+    }catch(err){
+
+        console.error(err);
 
         return "位置不明";
 
