@@ -584,7 +584,7 @@ id="ibxq9g"
 
         const today = new Date().toDateString();
 
-        const extremes = (tideData.data || []).filter(item => {
+        const extremes = (tideData.data || tideData.extremes || []).filter(item => {
             return new Date(item.time).toDateString() === today;
         });
         extremes.sort((a, b) =>
