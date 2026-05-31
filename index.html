@@ -436,11 +436,8 @@ saveButton.addEventListener(
     };
 
 const logs =
-JSON.parse(
-    localStorage.getItem("fishingLogs") || "[]"
-);
+JSON.parse(localStorage.getItem("fishingLogs") || "[]");
 
-// 編集か新規か判定
 if(editingIndex !== null){
 
     logs[editingIndex] = record;
