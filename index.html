@@ -759,23 +759,17 @@ function renderLogs(){
         height="120"
         ></canvas>
 
-        <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
 
-        
-        <button
-        style="float:left;"
-        onclick="editLog(${index})"
-        >
+        <button onclick="editLog(${index})">
         編集
         </button>
-        </div>
 
-        <button
-        style="float:right;"
-        onclick="deleteLog(${index})"
-        >
+        <button onclick="deleteLog(${index})">
         削除
         </button>
+
+        </div>
 
         `;
 
