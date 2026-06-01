@@ -616,13 +616,18 @@ id="ibxq9g"
 
         const today = new Date().toDateString();
 
-        const extremes = (tideData.data || tideData.extremes || []).filter(item => {
-            return new Date(item.time).toDateString() === today;
-        });
-        extremes.sort((a, b) =>
-    new Date(a.time) - new Date(b.time)
-);
+const extremes = (tideData.data || tideData.extremes || []).filter(item => {
 
+    const jstDate = new Date(item.time);
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    const itemDate = new Date(jstDate);
+    itemDate.setHours(0,0,0,0);
+
+    return itemDate.getTime() === today.getTime();
+});
         let highList = [];
         let lowList = [];
 
