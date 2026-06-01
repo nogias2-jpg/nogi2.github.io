@@ -228,7 +228,7 @@ a{
 <div class="title">
 
 <h1>
-🎣 Fishing Log 1.0
+🎣 Fishing Log 1.1
 </h1>
 
 </div>
@@ -682,7 +682,41 @@ id="ibxq9g"
 
 }
 
+function buildTideWithMargin(highTide, lowTide){
 
+    const high = highTide.split(" / ").map(t => {
+        const [h, m] = t.split(":").map(Number);
+        return h + m / 60;
+    });
+
+    const low = lowTide.split(" / ").map(t => {
+        const [h, m] = t.split(":").map(Number);
+        return h + m / 60;
+    });
+
+    const data = [];
+
+    // ★ここが重要（-6時間〜30時間）
+    for(let i = -6; i <= 30; i += 0.25){
+
+        let value = 50;
+
+        const nearestHigh = Math.min(...high.map(h => Math.abs(h - i)));
+        const nearestLow  = Math.min(...low.map(l => Math.abs(l - i)));
+
+        value += (nearestLow - nearestHigh) * 15;
+
+        data.push({
+            time: i,
+            value: Math.max(0, Math.min(100, value))
+        });
+    }
+
+    return data;
+}
+
+
+    
 
 function renderLogs(){
 
@@ -869,10 +903,10 @@ log
 
     }
 
-    const tideData = buildRealTideCurve(
-        log.tide.highTide,
-        log.tide.lowTide
-    );
+const fullData = buildTideWithMargin(
+    log.tide.highTide,
+    log.tide.lowTide
+);
 
     const catchHour =
 
@@ -880,7 +914,12 @@ log
         log.datetime
     ).getHours();
 
+    const tideData = fullData
+    .filter(p => p.time >= 0 && p.time <= 24)
+    .map(p => p.value);
+    
     const markerData =
+        
 
     labels.map((_,i) => {
 
@@ -892,39 +931,25 @@ log
 
     });
 
-    new Chart(ctx, {
-
-        type:"line",
-
-        data:{
-
-            labels,
-
-            datasets:[
-
-                {
-                    label:"潮位",
-
-                    data:tideData,
-
-                    tension:0.4
-                },
-
-                {
-                    label:"釣れた時間",
-
-                    data:markerData,
-
-                    pointRadius:8,
-
-                    showLine:false
-                }
-
-            ]
-
-        }
-
-    });
+new Chart(ctx, {
+    type: "line",
+    data: {
+        labels: labels,
+        datasets: [
+            {
+                label: "潮位",
+                data: tideData,
+                tension: 0.4
+            },
+            {
+                label: "釣れた時間",
+                data: markerData,
+                pointRadius: 8,
+                showLine: false
+            }
+        ]
+    }
+});
 
 }
 
