@@ -228,7 +228,7 @@ a{
 <div class="title">
 
 <h1>
-🎣 Fishing Log 1.5
+🎣 Fishing Log 1.6
 </h1>
 
 </div>
@@ -880,30 +880,14 @@ function buildRealTideCurve(highTide, lowTide){
     return data;
 }
     
-function drawTideChart(
-index,
-log
-){
-
-    const ctx =
-
-    document.getElementById(
-        `chart-${index}`
-    );
-
-    if(!ctx) return;
+const ctx = document.getElementById(`chart-${index}`);
+if(!ctx) return;
 
 const labels = [];
 
-for(let i=0;i<=24;i++){
+for(let i = 0; i <= 24; i++){
     labels.push(`${i}:00`);
 }
-
-const tideData = Array.from({length: 25}, (_, i) => {
-    return Math.sin(i / 3) * 50 + 50;
-});
-
-    }
 
 const fullData = buildTideWithMargin(
     log.tide.highTide,
@@ -917,14 +901,11 @@ const tideData = fullData
     .map(p => p.value);
 
 const markerData = labels.map((_, i) => {
-
-    if(i === catchHour){
-        return 100;
-    }
-
-    return null;
+    return i === catchHour ? 100 : null;
 });
+
 console.log(tideData.slice(0, 10));
+
 new Chart(ctx, {
     type: "line",
     data: {
@@ -944,7 +925,6 @@ new Chart(ctx, {
         ]
     }
 });
-
 }
 
 function cancelEdit(){
