@@ -822,11 +822,6 @@ style="background:#6b7280;color:white;border:none;padding:6px 12px;border-radius
 
         historyList.appendChild(div);
 
-        drawTideChart(
-            index,
-            log
-        );
-
     });
 
     renderMap(logs);
@@ -835,85 +830,7 @@ style="background:#6b7280;color:white;border:none;padding:6px 12px;border-radius
 
 }
 
-function drawTideChart(
-index,
-log
-){
 
-    const ctx =
-
-    document.getElementById(
-        `chart-${index}`
-    );
-
-    if(!ctx) return;
-
-    const labels = [];
-
-    for(let i=0;i<=24;i++){
-
-        labels.push(
-            `${i}:00`
-        );
-
-    }
-
-    const tideData =
-    generateFakeTide();
-
-    const catchHour =
-
-    new Date(
-        log.datetime
-    ).getHours();
-
-    const markerData =
-
-    labels.map((_,i) => {
-
-        if(i === catchHour){
-            return 100;
-        }
-
-        return null;
-
-    });
-
-    new Chart(ctx, {
-
-        type:"line",
-
-        data:{
-
-            labels,
-
-            datasets:[
-
-                {
-                    label:"潮位",
-
-                    data:tideData,
-
-                    tension:0.4
-                },
-
-                {
-                    label:"釣れた時間",
-
-                    data:markerData,
-
-                    pointRadius:8,
-
-                    showLine:false
-                }
-
-            ]
-
-        }
-
-    });
-
-}
 
 function cancelEdit(){
     editingIndex = null;
