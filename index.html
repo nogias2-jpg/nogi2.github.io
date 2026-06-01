@@ -228,7 +228,7 @@ a{
 <div class="title">
 
 <h1>
-🎣 Fishing Log 1.4
+🎣 Fishing Log 1.5
 </h1>
 
 </div>
@@ -893,13 +893,15 @@ log
 
     if(!ctx) return;
 
-    const labels = [];
+const labels = [];
 
-    for(let i=0;i<=24;i++){
+for(let i=0;i<=24;i++){
+    labels.push(`${i}:00`);
+}
 
-        labels.push(
-            `${i}:00`
-        );
+const tideData = Array.from({length: 25}, (_, i) => {
+    return Math.sin(i / 3) * 50 + 50;
+});
 
     }
 
@@ -922,7 +924,7 @@ const markerData = labels.map((_, i) => {
 
     return null;
 });
-
+console.log(tideData.slice(0, 10));
 new Chart(ctx, {
     type: "line",
     data: {
