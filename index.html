@@ -228,7 +228,7 @@ a{
 <div class="title">
 
 <h1>
-🎣 Fishing Log 1.2
+🎣 Fishing Log 1.3
 </h1>
 
 </div>
@@ -682,32 +682,34 @@ id="ibxq9g"
 
 }
 
-function buildTideCurve(highTide, lowTide){
+function buildTideWithMargin(highTide, lowTide){
 
-    const parse = t => {
-        const [h,m] = t.split(":").map(Number);
-        return h + m/60;
-    };
+    const high = highTide.split(" / ").map(t => {
+        const [h, m] = t.split(":").map(Number);
+        return h + m / 60;
+    });
 
-    const highs = highTide.split(" / ").map(parse);
-    const lows  = lowTide.split(" / ").map(parse);
+    const low = lowTide.split(" / ").map(t => {
+        const [h, m] = t.split(":").map(Number);
+        return h + m / 60;
+    });
 
     const data = [];
 
-    for(let i = 0; i <= 24; i += 0.25){
+    // ★ここが重要（-6時間〜30時間）
+    for(let i = -6; i <= 30; i += 0.25){
 
-        // 距離ベース（簡易波モデル）
         let value = 50;
 
-        highs.forEach(h => {
-            value += Math.cos((i - h) * Math.PI / 6) * 20;
-        });
+        const nearestHigh = Math.min(...high.map(h => Math.abs(h - i)));
+        const nearestLow  = Math.min(...low.map(l => Math.abs(l - i)));
 
-        lows.forEach(l => {
-            value -= Math.cos((i - l) * Math.PI / 6) * 20;
-        });
+        value += (nearestLow - nearestHigh) * 15;
 
-        data.push(value);
+        data.push({
+            time: i,
+            value: Math.max(0, Math.min(100, value))
+        });
     }
 
     return data;
@@ -901,7 +903,7 @@ log
 
     }
 
-const tideData = buildTideCurve(
+const fullData = buildTideWithMargin(
     log.tide.highTide,
     log.tide.lowTide
 );
