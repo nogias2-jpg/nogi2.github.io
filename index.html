@@ -682,28 +682,7 @@ id="ibxq9g"
 
 }
 
-function generateFakeTide(){
 
-    let data = [];
-
-    for(let i=0;i<=24;i++){
-
-        const v =
-
-        50 +
-
-        Math.sin(
-            (i / 24) *
-            Math.PI * 2
-        ) * 40;
-
-        data.push(v);
-
-    }
-
-    return data;
-
-}
 
 function renderLogs(){
 
@@ -835,6 +814,38 @@ style="background:#6b7280;color:white;border:none;padding:6px 12px;border-radius
 
 }
 
+function timeToHour(t){
+    if(!t) return null;
+    return parseInt(t.split(":")[0]);
+}
+
+function buildRealTideCurve(highTide, lowTide){
+
+    const high = highTide ? highTide.split(" / ") : [];
+    const low = lowTide ? lowTide.split(" / ") : [];
+
+    const highHours = high.map(timeToHour).filter(v => v !== null);
+    const lowHours = low.map(timeToHour).filter(v => v !== null);
+
+    const data = [];
+
+    for(let i=0;i<=24;i++){
+
+        // 一番近い満潮・干潮を探す
+        let nearestHigh = Math.min(...highHours.map(h => Math.abs(h - i)));
+        let nearestLow = Math.min(...lowHours.map(h => Math.abs(h - i)));
+
+        // シンプルな波形再現（距離で高さ決定）
+        let value = 50;
+
+        value += (nearestLow - nearestHigh) * 10;
+
+        data.push(Math.max(0, Math.min(100, value)));
+    }
+
+    return data;
+}
+    
 function drawTideChart(
 index,
 log
@@ -858,8 +869,10 @@ log
 
     }
 
-    const tideData =
-    generateFakeTide();
+    const tideData = buildRealTideCurve(
+        log.tide.highTide,
+        log.tide.lowTide
+    );
 
     const catchHour =
 
