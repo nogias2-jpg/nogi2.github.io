@@ -228,7 +228,7 @@ a{
 <div class="title">
 
 <h1>
-🎣 Fishing Log 1.6
+🎣 Fishing Log
 </h1>
 
 </div>
@@ -682,41 +682,28 @@ id="ibxq9g"
 
 }
 
-function buildTideWithMargin(highTide, lowTide){
+function generateFakeTide(){
 
-    const high = highTide.split(" / ").map(t => {
-        const [h, m] = t.split(":").map(Number);
-        return h + m / 60;
-    });
+    let data = [];
 
-    const low = lowTide.split(" / ").map(t => {
-        const [h, m] = t.split(":").map(Number);
-        return h + m / 60;
-    });
+    for(let i=0;i<=24;i++){
 
-    const data = [];
+        const v =
 
-    // ★ここが重要（-6時間〜30時間）
-    for(let i = -6; i <= 30; i += 0.25){
+        50 +
 
-        let value = 50;
+        Math.sin(
+            (i / 24) *
+            Math.PI * 2
+        ) * 40;
 
-        const nearestHigh = Math.min(...high.map(h => Math.abs(h - i)));
-        const nearestLow  = Math.min(...low.map(l => Math.abs(l - i)));
+        data.push(v);
 
-        value += (nearestLow - nearestHigh) * 15;
-
-        data.push({
-            time: i,
-            value: Math.max(0, Math.min(100, value))
-        });
     }
 
     return data;
+
 }
-
-
-    
 
 function renderLogs(){
 
@@ -848,83 +835,84 @@ style="background:#6b7280;color:white;border:none;padding:6px 12px;border-radius
 
 }
 
-function timeToHour(t){
-    if(!t) return null;
-    return parseInt(t.split(":")[0]);
-}
+function drawTideChart(
+index,
+log
+){
 
-function buildRealTideCurve(highTide, lowTide){
+    const ctx =
 
-    const high = highTide ? highTide.split(" / ") : [];
-    const low = lowTide ? lowTide.split(" / ") : [];
+    document.getElementById(
+        `chart-${index}`
+    );
 
-    const highHours = high.map(timeToHour).filter(v => v !== null);
-    const lowHours = low.map(timeToHour).filter(v => v !== null);
+    if(!ctx) return;
 
-    const data = [];
+    const labels = [];
 
     for(let i=0;i<=24;i++){
 
-        // 一番近い満潮・干潮を探す
-        let nearestHigh = Math.min(...highHours.map(h => Math.abs(h - i)));
-        let nearestLow = Math.min(...lowHours.map(h => Math.abs(h - i)));
+        labels.push(
+            `${i}:00`
+        );
 
-        // シンプルな波形再現（距離で高さ決定）
-        let value = 50;
-
-        value += (nearestLow - nearestHigh) * 10;
-
-        data.push(Math.max(0, Math.min(100, value)));
     }
 
-    return data;
-}
-    
-const ctx = document.getElementById(`chart-${index}`);
-if(!ctx) return;
+    const tideData =
+    generateFakeTide();
 
-const labels = [];
+    const catchHour =
 
-for(let i = 0; i <= 24; i++){
-    labels.push(`${i}:00`);
-}
+    new Date(
+        log.datetime
+    ).getHours();
 
-const fullData = buildTideWithMargin(
-    log.tide.highTide,
-    log.tide.lowTide
-);
+    const markerData =
 
-const catchHour = new Date(log.datetime).getHours();
+    labels.map((_,i) => {
 
-const tideData = fullData
-    .filter(p => p.time >= 0 && p.time <= 24)
-    .map(p => p.value);
+        if(i === catchHour){
+            return 100;
+        }
 
-const markerData = labels.map((_, i) => {
-    return i === catchHour ? 100 : null;
-});
+        return null;
 
-console.log(tideData.slice(0, 10));
+    });
 
-new Chart(ctx, {
-    type: "line",
-    data: {
-        labels: labels,
-        datasets: [
-            {
-                label: "潮位",
-                data: tideData,
-                tension: 0.4
-            },
-            {
-                label: "釣れた時間",
-                data: markerData,
-                pointRadius: 8,
-                showLine: false
-            }
-        ]
-    }
-});
+    new Chart(ctx, {
+
+        type:"line",
+
+        data:{
+
+            labels,
+
+            datasets:[
+
+                {
+                    label:"潮位",
+
+                    data:tideData,
+
+                    tension:0.4
+                },
+
+                {
+                    label:"釣れた時間",
+
+                    data:markerData,
+
+                    pointRadius:8,
+
+                    showLine:false
+                }
+
+            ]
+
+        }
+
+    });
+
 }
 
 function cancelEdit(){
